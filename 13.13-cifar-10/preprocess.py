@@ -58,12 +58,11 @@ def reorg_cifar10_data(data_dir, valid_ratio):
     reorg_train_valid(data_dir, labels, valid_ratio)
     reorg_test(data_dir)
 
-batch_size = 256
 valid_ratio = 0.1
 if __name__ == '__main__':
     reorg_cifar10_data(data_dir, valid_ratio)
 
-def load_argumentation():
+def load_argumentation(data_dir, train_length, batch_size = 256, num_workers = 4):
     """对图像数据集进行增广"""
     transform_train = torchvision.transforms.Compose([
         # 在高度和宽度上将图像放大到40像素的正方形
@@ -92,17 +91,16 @@ def load_argumentation():
         os.path.join(data_dir, 'train_valid_test', folder),
         transform=transform_test) for folder in ['valid', 'test']]
 
-    train_length = 45000
     print(f'训练样本为前{train_length}个。')
     train_iter, train_valid_iter = [torch.utils.data.DataLoader(
-        dataset, batch_size, shuffle=True, drop_last=True, num_workers = 4)
+        dataset, batch_size, shuffle=True, drop_last=True, num_workers = num_workers)
         for dataset in (Subset(train_ds, range(train_length)), train_valid_ds)]
     
 
     valid_iter = torch.utils.data.DataLoader(valid_ds, batch_size, shuffle=False,
-                                            drop_last=True, num_workers = 4)
+                                            drop_last=True, num_workers = num_workers)
 
     test_iter = torch.utils.data.DataLoader(test_ds, batch_size, shuffle=False,
-                                            drop_last=False, num_workers = 4)
+                                            drop_last=False, num_workers = num_workers)
     
     return train_iter, train_valid_iter, valid_iter, test_iter, train_valid_ds, test_ds
